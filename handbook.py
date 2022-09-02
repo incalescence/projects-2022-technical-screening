@@ -14,11 +14,22 @@ NOTE: We do not expect you to come up with a perfect solution. We are more inter
 in how you would approach a problem like this.
 """
 import json
+import re 
+
+def clean_conditions(conditions):
+    """Tidy extraneous information such as extra punctations and words from the text conditions
+    """
+    for course, condition in conditions.items():
+        course_codes = re.findall(r"[A-Z]{4}[0-9]{4}", condition)
+        conditions[course] = " ".join(course_codes)
+    return conditions
 
 # NOTE: DO NOT EDIT conditions.json
 with open("./conditions.json") as f:
     CONDITIONS = json.load(f)
     f.close()
+
+TIDY_CONDITIONS = clean_conditions(CONDITIONS)
 
 def is_unlocked(courses_list, target_course):
     """Given a list of course codes a student has taken, return true if the target_course 
@@ -29,11 +40,32 @@ def is_unlocked(courses_list, target_course):
 
     You can assume all courses are worth 6 units of credit
     """
+
+    # the student has not completed any courses 
+    if len(courses_list) == 0:
+        if target_course == "COMP1511":
+            return True
+        return False
+
+    # calculate the total units the student has completed
+    total_units = 0
+    for course in courses_list:
+        total_units += 6
+
+    # get the number of COMP courses taken by the student
+    num_comp_courses = 0
+    for course in courses_list:
+        if course[:4] == "COMP":
+            num_comp_courses += 1
     
-    # TODO: COMPLETE THIS FUNCTION!!!
+    # check the condition of the target course
+    target_condition = TIDY_CONDITIONS[target_course]
+    for course in courses_list:
+        if course not in target_condition:
+            return False
     
     return True
-
+    
 
 
 
